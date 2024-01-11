@@ -15,7 +15,10 @@ bg = pygame.image.load("data/mainwind.jpg")
 
 img1 = pygame.image.load("data/img_1.png")
 img1 = pygame.transform.scale(img1, (200, 70))
-
+img2 = pygame.image.load("data/Green.jpg")
+img2 = pygame.transform.scale(img1, (200, 70))
+le1 = pygame.image.load("data/lev.jpg")
+le1 = pygame.transform.scale(le1, (200, 200))
 
 class Button():
     def __init__(self, image, pos, te_in, b_color, h_color):
@@ -64,51 +67,90 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
-
-def play(self):
+def level1():
     pygame.display.set_caption("Основной экран")
-    screen.fill("black")
-    fon = pygame.transform.scale(load_image("playw.jpg"),
-                                 (screen.get_width(), screen.get_height()))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.Font('arial', 48)
-    font = font.render("Уровни", True, (66, 170, 255))
-    st_t = font.get_rect(center=(300, 100))
+    while True:
+        screen.fill("black")
+        fon = pygame.transform.scale(load_image("playw.jpg"),
+                                     (screen.get_width(), screen.get_height()))
+        screen.blit(fon, (0, 0))
+        font = pygame.font.SysFont('arial', 48)
+def level2():
+    pass
+def play():
+    pygame.display.set_caption("Основной экран")
+    while True:
+        screen.fill("black")
+        fon = pygame.transform.scale(load_image("playw.jpg"),
+                                     (screen.get_width(), screen.get_height()))
+        screen.blit(fon, (0, 0))
+        font = pygame.font.SysFont('arial', 48)
+        font = font.render("Уровни", True, (255, 255, 255))
+        st_t = font.get_rect(center=(300, 150))
+        pos = pygame.mouse.get_pos()
+        rules = Button(image=img2, pos=(300, 50), te_in="Rules"
+                       , b_color=(255, 255, 255), h_color="#6495ED")
+        exb = Button(image=None, pos=(500, 450), te_in="Back"
+                     , b_color=(0, 0, 0), h_color="white")
+        lev1 = Button(image=le1, pos=(150, 300), te_in="Level 1"
+                       , b_color=(255, 255, 255), h_color="#6495ED")
+        lev2 = Button(image=le1, pos=(450, 300), te_in="Level 2"
+                      , b_color=(255, 255, 255), h_color="#6495ED")
+        screen.blit(font, st_t)
+        for button in [rules, exb, lev1, lev2]:
+            button.butcolour(pos)
+            button.update(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if rules.inside(pos):
+                    rule()
+                if exb.inside(pos):
+                    start_screen(screen)
+                if lev1.inside(pos):
+                    level1()
+                    terminate()
+                if lev2.inside(pos):
+                    level2()
+        pygame.display.update()
 
+def rule():
+    pass
 
 def start_screen(screen):
     clock = pygame.time.Clock()
     intro_text = ["Утка в погоне за утятами"]
     # "Если в правилах несколько строк,",
     # "приходится выводить их построчно"]
+    while True:
+        fon = pygame.transform.scale(load_image("mainwind.jpg"),
+                                     (screen.get_width(), screen.get_height()))
+        screen.blit(fon, (0, 0))
+        font = pygame.font.SysFont('arial', 48)
+        font = font.render("Утка в погоне за утятами", True, (74, 144, 226))
 
-    fon = pygame.transform.scale(load_image("mainwind.jpg"),
-                                 (screen.get_width(), screen.get_height()))
-    screen.blit(fon, (0, 0))
-    font = pygame.font.SysFont('arial', 48)
-    font = font.render("Утка в погоне за утятами", True, (74, 144, 226))
+        pos = pygame.mouse.get_pos()
+        st_t = font.get_rect(center=(300, 100))
+        playb = Button(image=img1, pos=(300, 200), te_in="Начать игру"
+                      , b_color=(255, 255, 255), h_color="#f0d8a2")
+        exb = Button(image=img1, pos=(300, 300), te_in="Выход"
+                     , b_color=(255, 255, 255), h_color="#f1abad")
+        screen.blit(font, st_t)
+        for button in [playb, exb]:
+            button.butcolour(pos)
+            button.update(screen)
 
-    pos = pygame.mouse.get_pos()
-    st_t = font.get_rect(center=(300, 100))
-    playb = Button(image=img1, pos=(300, 200), te_in="Начать игру"
-                  , b_color=(255, 255, 255), h_color="#f0d8a2")
-    exb = Button(image=img1, pos=(300, 300), te_in="Выход"
-                 , b_color=(255, 255, 255), h_color="#f1abad")
-    screen.blit(font, st_t)
-    for button in [playb, exb]:
-        button.butcolour(pos)
-        button.update(screen)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            terminate()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if playb.inside(pos):
-                play()
-            if exb.inside(pos):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 terminate()
-    pygame.display.update()
-    clock.tick(FPS)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if playb.inside(pos):
+                    play()
+                if exb.inside(pos):
+                    terminate()
+        pygame.display.update()
+        clock.tick(FPS)
 
 
 def terminate():
