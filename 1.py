@@ -5,7 +5,38 @@ import random
 
 FPS = 50
 pygame.init()
-screen = pygame.display.set_mode((400, 400))
+screen = pygame.display.set_mode((600, 500))
+bg = pygame.image.load("data/mainwind.jpg")
+
+class Button():
+    def __init__(self, image, pos, te_in, font, b_color, h_color):
+        self.image = image
+        self.x_pos = pos[0]
+        self.y_pos = pos[1]
+        self.font = font
+        self.color1, self.color2 = b_color, h_color
+        self.text = te_in
+        self.tex = self.font.render(self.text, True, self.color1)
+        if self.image is None:
+            self.image = self.tex
+
+        self.rect = self.image.get_rect(centre=(self.x_pos, self.y_pos))
+        self.text_inr = self.tex(centre=(self.x_pos, self.y_pos))
+    def update(self, screen):
+        if self.image is not None:
+            screen.blit(self.image, self.rect)
+        screen.blit(self.tex, self.text_inr)
+
+    def inside(self, pos):
+        if pos[0] in range(self.rect.left, self.rest.right) and pos[1] in range(self.rect.top, self.rect.bottom):
+            return True
+        return False
+
+    def butcolour(self, pos):
+        if pos[0] in range(self.rect.left, self.rest.right) and pos[1] in range(self.rect.top, self.rect.bottom):
+            self.tex = self.font.render(self.text_inr, True, self.color2)
+        else:
+            self.tex = self.font.render(self.text_inr, True, self.color1)
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -25,11 +56,12 @@ def load_image(name, colorkey=None):
 def start_screen(screen):
     clock = pygame.time.Clock()
     intro_text = ["Утка в погоне за утятами", "",
-                  "Ищи люгушек для утят, чтобы их прокормить"]
+                  "Ищи люгушек для утят,"
+                  " чтобы их прокормить"]
                   # "Если в правилах несколько строк,",
                   # "приходится выводить их построчно"]
 
-    fon = pygame.transform.scale(load_image('fon.jpg'),
+    fon = pygame.transform.scale(load_image("mainwind.jpg"),
                                  (screen.get_width(), screen.get_height()))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -65,6 +97,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
         screen.fill((0, 0, 0))
+        start_screen(screen)
         pygame.display.flip()
 
     pygame.quit()
