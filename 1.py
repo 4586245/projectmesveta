@@ -3,7 +3,6 @@ import os
 import sys
 import random
 
-
 pygame.font.init()
 FPS = 50
 pygame.init()
@@ -19,6 +18,7 @@ img2 = pygame.image.load("data/Green.jpg")
 img2 = pygame.transform.scale(img1, (200, 70))
 le1 = pygame.image.load("data/lev.jpg")
 le1 = pygame.transform.scale(le1, (200, 200))
+
 
 class Button():
     def __init__(self, image, pos, te_in, b_color, h_color):
@@ -53,6 +53,7 @@ class Button():
 
 
 def load_image(name, colorkey=None):
+
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -67,16 +68,51 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+
+# fr = load_image("fr1.jpg", None)
+
+lv = pygame.image.load("level1.jpg")
+lv = pygame.transform.scale(lv, (600, 500))
+
+# gr = pygame.image.load("data/Green.jpg")
+# gr = pygame.transform.scale(gr, (600, 500))
+walk = [
+    pygame.image.load("data/fr1/frame_0.png"),
+    pygame.image.load("data/fr1/frame_1.png"),
+    pygame.image.load("data/fr1/frame_2.png"),
+    pygame.image.load("data/fr1/frame_3.png"),
+]
+
+
+
+
 def level1():
     pygame.display.set_caption("Основной экран")
+    clock = pygame.time.Clock()
+
+    player_count = 0
     while True:
-        screen.fill("black")
-        fon = pygame.transform.scale(load_image("playw.jpg"),
-                                     (screen.get_width(), screen.get_height()))
-        screen.blit(fon, (0, 0))
-        font = pygame.font.SysFont('arial', 48)
+        screen.blit(lv, (0, 0))
+        screen.blit(walk[player_count], (300, 250))
+        # fon = pygame.transform.scale(load_image("playw.jpg"),
+        #                              (screen.get_width(), screen.get_height()))
+        # screen.blit(fon, (0, 0))
+        # font = pygame.font.SysFont('arial', 48)
+        if player_count == 3:
+            player_count = 0
+        else:
+            player_count += 1
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+        pygame.display.update()
+        clock.tick(10)
+
+
 def level2():
     pass
+
+
 def play():
     pygame.display.set_caption("Основной экран")
     while True:
@@ -93,7 +129,7 @@ def play():
         exb = Button(image=None, pos=(500, 450), te_in="Back"
                      , b_color=(0, 0, 0), h_color="white")
         lev1 = Button(image=le1, pos=(150, 300), te_in="Level 1"
-                       , b_color=(255, 255, 255), h_color="#6495ED")
+                      , b_color=(255, 255, 255), h_color="#6495ED")
         lev2 = Button(image=le1, pos=(450, 300), te_in="Level 2"
                       , b_color=(255, 255, 255), h_color="#6495ED")
         screen.blit(font, st_t)
@@ -110,13 +146,14 @@ def play():
                     start_screen(screen)
                 if lev1.inside(pos):
                     level1()
-                    terminate()
                 if lev2.inside(pos):
                     level2()
         pygame.display.update()
 
+
 def rule():
     pass
+
 
 def start_screen(screen):
     clock = pygame.time.Clock()
@@ -133,7 +170,7 @@ def start_screen(screen):
         pos = pygame.mouse.get_pos()
         st_t = font.get_rect(center=(300, 100))
         playb = Button(image=img1, pos=(300, 200), te_in="Начать игру"
-                      , b_color=(255, 255, 255), h_color="#f0d8a2")
+                       , b_color=(255, 255, 255), h_color="#f0d8a2")
         exb = Button(image=img1, pos=(300, 300), te_in="Выход"
                      , b_color=(255, 255, 255), h_color="#f1abad")
         screen.blit(font, st_t)
@@ -156,6 +193,10 @@ def start_screen(screen):
 def terminate():
     pygame.quit()
     sys.exit()
+
+
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
 
 
 def main():
