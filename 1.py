@@ -71,7 +71,7 @@ def load_image(name, colorkey=None):
 
 # fr = load_image("fr1.jpg", None)
 
-lv = pygame.image.load("level1.jpg")
+lv = pygame.image.load("data/level1.jpg")
 lv = pygame.transform.scale(lv, (600, 500))
 
 # gr = pygame.image.load("data/Green.jpg")
@@ -91,9 +91,12 @@ def level1():
     clock = pygame.time.Clock()
 
     player_count = 0
+    lv_x = 0
     while True:
-        screen.blit(lv, (0, 0))
-        screen.blit(walk[player_count], (300, 250))
+        screen.blit(lv, (lv_x, 0))
+        screen.blit(lv, (lv_x + 600, 0))
+
+        screen.blit(walk[player_count], (100, 230))
         # fon = pygame.transform.scale(load_image("playw.jpg"),
         #                              (screen.get_width(), screen.get_height()))
         # screen.blit(fon, (0, 0))
@@ -102,6 +105,9 @@ def level1():
             player_count = 0
         else:
             player_count += 1
+        lv_x -= 3
+        if lv_x == -600:
+            lv_x = 0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
