@@ -8,20 +8,23 @@ pygame.init()
 screen = pygame.display.set_mode((600, 500))
 bg = pygame.image.load("data/mainwind.jpg")
 
+# def get_fonts(shr):
+#     return pygame.font.get_fonts(shr)
+
 class Button():
-    def __init__(self, image, pos, te_in, font, b_color, h_color):
+    def __init__(self, image, pos, te_in, b_color, h_color):
         self.image = image
         self.x_pos = pos[0]
         self.y_pos = pos[1]
-        self.font = font
         self.color1, self.color2 = b_color, h_color
         self.text = te_in
+        self.font = pygame.font.SysFont('serif', 48)
         self.tex = self.font.render(self.text, True, self.color1)
         if self.image is None:
             self.image = self.tex
 
-        self.rect = self.image.get_rect(centre=(self.x_pos, self.y_pos))
-        self.text_inr = self.tex(centre=(self.x_pos, self.y_pos))
+        self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+        self.text_inr = self.tex.get_rect(center=(self.x_pos, self.y_pos))
     def update(self, screen):
         if self.image is not None:
             screen.blit(self.image, self.rect)
@@ -33,7 +36,7 @@ class Button():
         return False
 
     def butcolour(self, pos):
-        if pos[0] in range(self.rect.left, self.rest.right) and pos[1] in range(self.rect.top, self.rect.bottom):
+        if pos[0] in range(self.rect.left, self.rect.right) and pos[1] in range(self.rect.top, self.rect.bottom):
             self.tex = self.font.render(self.text_inr, True, self.color2)
         else:
             self.tex = self.font.render(self.text_inr, True, self.color1)
@@ -53,35 +56,42 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+def play(self):
+    pass
 def start_screen(screen):
     clock = pygame.time.Clock()
-    intro_text = ["Утка в погоне за утятами", "",
-                  "Ищи люгушек для утят,"
-                  " чтобы их прокормить"]
+    intro_text = ["Утка в погоне за утятами"]
                   # "Если в правилах несколько строк,",
                   # "приходится выводить их построчно"]
 
     fon = pygame.transform.scale(load_image("mainwind.jpg"),
                                  (screen.get_width(), screen.get_height()))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
+    font = pygame.font.SysFont('serif', 48)
+    font = font.render("Утка в погоне за утятами", True, (74, 144, 226))
+
+    pos = pygame.mouse.get_pos()
+    st_t = font.get_rect(center=(300, 100))
+    play = Button(image=pygame.image.load("data/pbut.png"), pos=(300, 300), te_in="Начать игру"
+                  , b_color=(255, 255, 255), h_color="#f0d8a2")
+    exb = Button(image=pygame.image.load("data/pbut.png"), pos=(300, 300), te_in="Выход"
+                 , b_color=(255, 255, 255), h_color="#f1abad")
+    screen.blit(font, st_t)
+    for button in [play, exb]:
+        button.butcolour(pos)
+        button.update(screen)
+
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if play.inside(pos):
+                    play()
+                if exb.inside(pos):
+                    pygame.quit()
+                    sys.exit
         pygame.display.flip()
         clock.tick(FPS)
 
