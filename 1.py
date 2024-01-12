@@ -53,7 +53,6 @@ class Button():
 
 
 def load_image(name, colorkey=None):
-
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -69,48 +68,124 @@ def load_image(name, colorkey=None):
     return image
 
 
-# fr = load_image("fr1.jpg", None)
-
-lv = pygame.image.load("data/level1.jpg")
-lv = pygame.transform.scale(lv, (600, 500))
-
-# gr = pygame.image.load("data/Green.jpg")
-# gr = pygame.transform.scale(gr, (600, 500))
-walk = [
-    pygame.image.load("data/fr1/frame_0.png"),
-    pygame.image.load("data/fr1/frame_1.png"),
-    pygame.image.load("data/fr1/frame_2.png"),
-    pygame.image.load("data/fr1/frame_3.png"),
-]
-
-
 
 
 def level1():
     pygame.display.set_caption("Основной экран")
+    walk = [
+        pygame.image.load("data/fr1/frame_0.png").convert_alpha(),
+        pygame.image.load("data/fr1/frame_1.png").convert_alpha(),
+        pygame.image.load("data/fr1/frame_2.png").convert_alpha(),
+        pygame.image.load("data/fr1/frame_3.png").convert_alpha(),
+    ]
+    walk1 = []
+    for i in walk:
+        a = pygame.transform.scale(i, (140, 140))
+        walk1.append(a)
+
+    lv = pygame.image.load("data/level1.jpg").convert()
+    lv = pygame.transform.scale(lv, (600, 500))
+
+    gamep = True
+
     clock = pygame.time.Clock()
+    bird = pygame.image.load("data/evel1.png").convert_alpha()
+    bird = pygame.transform.scale(bird, (120, 120))
+    bird_list = []
+    bir_tim = pygame.USEREVENT + 1
+    pygame.time.set_timer(bir_tim, 5000)
 
     player_count = 0
     lv_x = 0
+    lv_sound = pygame.mixer.Sound("data/sound/music.mp3")
+    lv_sound.play()
+    tim = 0
+    player_speed = 5
+    player_x = 100
+    player_y = 250
+
+    pos = pygame.mouse.get_pos()
+
+    font = pygame.font.SysFont("arial", 50)
+    lose = font.render("You lose!", False, (193, 196, 199))
+    rest = font.render("Restart", False, (115, 132, 148))
+    rest_rect = rest.get_rect(topleft=(180, 250))
+
+    i_jump = False
+    junp_count = 11
     while True:
         screen.blit(lv, (lv_x, 0))
         screen.blit(lv, (lv_x + 600, 0))
 
-        screen.blit(walk[player_count], (100, 230))
-        # fon = pygame.transform.scale(load_image("playw.jpg"),
-        #                              (screen.get_width(), screen.get_height()))
-        # screen.blit(fon, (0, 0))
-        # font = pygame.font.SysFont('arial', 48)
-        if player_count == 3:
-            player_count = 0
+
+        if gamep:
+            player_rect = walk1[0].get_rect(topleft=(player_x, player_y))
+
+            if bird_list:
+                for (a, elem) in enumerate(bird_list):
+                    screen.blit(bird, elem)
+                    elem.x -= 10
+
+                    if elem.x < - 10:
+                        bird_list.pop(a)
+
+                    if player_rect.colliderect(elem):
+                        gamep = False
+
+            screen.blit(walk[player_count], (player_x, player_y))
+            # fon = pygame.transform.scale(load_image("playw.jpg"),
+            #                              (screen.get_width(), screen.get_height()))
+            # screen.blit(fon, (0, 0))
+            # font = pygame.font.SysFont('arial', 48)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT] and player_x > 50:
+                player_x -= player_speed
+            elif keys[pygame.K_RIGHT] and player_x < 200:
+                player_x += player_speed
+
+            if not i_jump:
+                if keys[pygame.K_SPACE]:
+                    i_jump = True
+            else:
+                if junp_count >= -11:
+                    if junp_count > 0:
+                        player_y -= (junp_count ** 2) / 2
+                    else:
+                        player_y += (junp_count ** 2) / 2
+                    junp_count -= 1
+                else:
+                    i_jump = False
+                    junp_count = 11
+
+            if player_count == 3:
+                player_count = 0
+            else:
+                player_count += 1
+            lv_x -= 5
+
+            if lv_x == -600:
+                lv_x = 0
         else:
-            player_count += 1
-        lv_x -= 3
-        if lv_x == -600:
-            lv_x = 0
+            screen.fill((87, 88, 89))
+            screen.blit(lose, (200, 100))
+            screen.blit(rest, rest_rect)
+
+
+            if rest_rect.collidepoint(pos) and pygame.mouse.get_pressed():
+                gamep = True
+                player_x = 100
+                bird_list.clear()
+
+
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            if event.type == bir_tim:
+                bird_list.append(bird.get_rect(topleft=(620, 300)))
+
+
         pygame.display.update()
         clock.tick(10)
 
@@ -170,6 +245,7 @@ def start_screen(screen):
         fon = pygame.transform.scale(load_image("mainwind.jpg"),
                                      (screen.get_width(), screen.get_height()))
         screen.blit(fon, (0, 0))
+
         font = pygame.font.SysFont('arial', 48)
         font = font.render("Утка в погоне за утятами", True, (74, 144, 226))
 
