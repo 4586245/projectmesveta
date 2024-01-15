@@ -91,7 +91,7 @@ def pause():
         clock.tick(15)
 
 def level1():
-    pygame.display.set_caption("Основной экран")
+    pygame.display.set_caption("Уровень 1")
     walk = [
         pygame.image.load("data/fr1/frame_0.png").convert_alpha(),
         pygame.image.load("data/fr1/frame_1.png").convert_alpha(),
@@ -117,7 +117,17 @@ def level1():
     bird = pygame.transform.scale(bird, (120, 120))
     bird_list = []
     bir_tim = pygame.USEREVENT + 1
-    pygame.time.set_timer(bir_tim, random.randint(5000, 7000))
+    b = []
+    for i in range(30):
+        b.append(random.randint(5000, 7000))
+    for i in b:
+        pygame.time.set_timer(bir_tim, i)
+
+    wolf = pygame.image.load("data/snake.png").convert_alpha()
+    # wolf = pygame.transform.scale(wolf, (100, 100))
+    # wolf_list = []
+    wolf_tim = pygame.USEREVENT + 1
+    pygame.time.set_timer(wolf_tim, random.randint(5000, 7000))
 
     frog = pygame.image.load("data/frog.png").convert_alpha()
     frog = pygame.transform.scale(frog, (60, 60))
@@ -136,10 +146,9 @@ def level1():
 
     font = pygame.font.SysFont("arial", 50)
     lose = font.render("You lose!", False, (193, 196, 199))
+
     rest = font.render("Restart", False, (115, 132, 148))
-    bac = font.render("Back", False, (0, 0, 0))
     rest_rect = rest.get_rect(topleft=(220, 250))
-    bac_rect = bac.get_rect(topleft=(50, 20))
     exb = Button(image=None, pos=(50, 20), te_in="Back"
                  , b_color=(0, 0, 0), h_color="white")
 
@@ -149,12 +158,12 @@ def level1():
     above_b = False
 
     i_jump = False
-    junp_count = 9
+    junp_count = 10
     k = 0
-    while True:
+    run = True
+    while run:
         screen.blit(lv, (lv_x, 0))
         screen.blit(lv, (lv_x + 600, 0))
-        screen.blit(bac, bac_rect)
         if gamep:
             player_rect = walk1[0].get_rect(topleft=(player_x, player_y))
             print_tex("scores:" + str(scores), 480, 10)
@@ -182,6 +191,17 @@ def level1():
 
                     if player_rect.colliderect(elem):
                         gamep = False
+            #
+            # if wolf_list:
+            #     for (a, elem) in enumerate(wolf_list):
+            #         screen.blit(wolf, elem)
+            #         elem.x -= 12
+            #
+            #         if elem.x < - 10:
+            #             wolf_list.pop(a)
+            #
+            #         if player_rect.colliderect(elem):
+            #             gamep = False
 
             screen.blit(walk[player_count], (player_x, player_y))
 
@@ -202,7 +222,7 @@ def level1():
                 if keys[pygame.K_SPACE]:
                     i_jump = True
             else:
-                if junp_count >= -9:
+                if junp_count >= -10:
                     if junp_count > 0:
                         player_y -= (junp_count ** 2) / 2
                     else:
@@ -210,7 +230,7 @@ def level1():
                     junp_count -= 1
                 else:
                     i_jump = False
-                    junp_count = 9
+                    junp_count = 10
 
             if player_count == 3:
                 player_count = 0
@@ -218,12 +238,10 @@ def level1():
                 player_count += 1
             lv_x -= 10
 
+            pos = pygame.mouse.get_pos()
 
             if lv_x == -600:
                 lv_x = 0
-
-            if bac_rect.collidepoint(pos) and pygame.mouse.get_pressed()[0]:
-                play()
 
 
         else:
@@ -237,9 +255,11 @@ def level1():
                 gamep = True
                 player_x = 100
                 player_y = 250
+                i_jump = False
                 bird_list.clear()
                 scores = 0
                 frog_list.clear()
+                # wolf_list.clear()
 
 
 
@@ -249,11 +269,14 @@ def level1():
                 terminate()
             if event.type == bir_tim:
                 bird_list.append(bird.get_rect(topleft=(random.randint(630, 700), random.randint(250, 350))))
-            if event.type == frog_tim:
-                frog_list.append(frog.get_rect(topleft=(random.randint(760, 850), random.randint(300, 400))))
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if exb.inside(pos):
                     play()
+            if event.type == frog_tim:
+                frog_list.append(frog.get_rect(topleft=(random.randint(760, 850), random.randint(300, 400))))
+
+            # if event.type == wolf_tim:
+            #     wolf_list.append(wolf.get_rect(topleft=(random.randint(630, 700), random.randint(250, 350))))
 
 
         pygame.display.update()
@@ -265,7 +288,7 @@ def level2():
 
 
 def play():
-    pygame.display.set_caption("Основной экран")
+    pygame.display.set_caption("Главное меню")
     while True:
         screen.fill("black")
         fon = pygame.transform.scale(load_image("playw.jpg"),
