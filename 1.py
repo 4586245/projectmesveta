@@ -110,41 +110,31 @@ def level1():
     gamep = True
 
     clock = pygame.time.Clock()
+
     bird = pygame.image.load("data/evel1.png").convert_alpha()
     bird = pygame.transform.scale(bird, (120, 120))
     bird_list = []
     bir_tim = pygame.USEREVENT + 1
-    b = []
-    for i in range(30):
-        b.append(random.randint(5000, 7000))
-    for i in b:
-        pygame.time.set_timer(bir_tim, i)
-        continue
+    pygame.time.set_timer(bir_tim, 5000)
 
+    sn = pygame.image.load("data/snake.png").convert_alpha()
+    sn = pygame.transform.scale(sn, (100, 100))
+    sn_list = []
+    sn_tim = pygame.USEREVENT + 1
+    pygame.time.set_timer(sn_tim, 9000)
 
-
-    wolf = pygame.image.load("data/snake.png").convert_alpha()
-    wolf = pygame.transform.scale(wolf, (100, 100))
+    wolf = pygame.image.load("data/wolf.png").convert_alpha()
+    wolf = pygame.transform.scale(wolf, (130, 130))
     wolf_list = []
     wolf_tim = pygame.USEREVENT + 1
-    w = []
-    for i in range(30):
-        w.append(random.randint(7000, 9000))
-    for i in w:
-        b1 =
-        pygame.time.set_timer(wolf_tim, i)
-        continue
-
+    pygame.time.set_timer(wolf_tim, 9000)
 
     frog = pygame.image.load("data/frog.png").convert_alpha()
     frog = pygame.transform.scale(frog, (60, 60))
     frog_list = []
     frog_tim = pygame.USEREVENT + 1
     f = []
-    for i in range(30):
-        f.append(random.randint(9000, 12000))
-    for i in f:
-        pygame.time.set_timer(frog_tim, i)
+    pygame.time.set_timer(frog_tim, 12000)
 
     player_count = 0
     lv_x = 0
@@ -160,7 +150,6 @@ def level1():
     rest = font.render("Restart", False, (115, 132, 148))
     rest_rect = rest.get_rect(topleft=(220, 250))
 
-
     exb = Button(image=None, pos=(50, 20), te_in="Back"
                  , b_color=(0, 0, 0), h_color="white")
 
@@ -170,11 +159,12 @@ def level1():
 
     i_jump = False
     junp_count = 10
-    k = 0
+
     run = True
     while run:
         screen.blit(lv, (lv_x, 0))
         screen.blit(lv, (lv_x + 600, 0))
+        k = 0
         if gamep:
             player_rect = walk1[0].get_rect(topleft=(player_x, player_y))
             print_tex("scores:" + str(scores), 480, 10)
@@ -185,7 +175,7 @@ def level1():
                     screen.blit(frog, elem)
                     elem.x -= 10
 
-                    if elem.x < - 10:
+                    if elem.x < - 20:
                         frog_list.pop(a)
 
                     if player_rect.colliderect(elem):
@@ -197,7 +187,7 @@ def level1():
                     screen.blit(bird, elem)
                     elem.x -= 10
 
-                    if elem.x < - 10:
+                    if elem.x < - 20:
                         bird_list.pop(a)
 
                     if player_rect.colliderect(elem):
@@ -206,15 +196,26 @@ def level1():
             if wolf_list:
                 for (a, elem) in enumerate(wolf_list):
                     screen.blit(wolf, elem)
-                    elem.x -= 12
+                    elem.x -= 10
 
-                    if elem.x < - 10:
+                    if elem.x < - 20:
                         wolf_list.pop(a)
 
                     if player_rect.colliderect(elem):
                         gamep = False
 
-            screen.blit(walk[player_count], (player_x, player_y))
+            if sn_list:
+                for (a, elem) in enumerate(sn_list):
+                    screen.blit(sn, elem)
+                    elem.x -= 10
+
+                    if elem.x < - 20:
+                        sn_list.pop(a)
+
+                    if player_rect.colliderect(elem):
+                        gamep = False
+
+            screen.blit(walk1[player_count], (player_x, player_y))
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT] and player_x > 50:
@@ -269,22 +270,53 @@ def level1():
                 scores = 0
                 frog_list.clear()
                 wolf_list.clear()
+                sn_list.clear()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+                lv_sound.stop()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if exb.inside(pos):
+                    lv_sound.stop()
                     play()
 
+
             if event.type == wolf_tim:
-                wolf_list.append(wolf.get_rect(topleft=(random.randint(630, 700), random.randint(250, 350))))
+                if k % 3 == 0:
+                    wolf_list.append(wolf.get_rect(topleft=(500, random.randint(250, 350))))
+                    k += 1
+                elif k % 3 == 1:
+                    wolf_list.append(wolf.get_rect(topleft=(1000, random.randint(250, 350))))
+                    k += 1
+                else:
+                    wolf_list.append(wolf.get_rect(topleft=(1500, random.randint(250, 350))))
+                    k += 1
 
             if event.type == bir_tim:
-                bird_list.append(bird.get_rect(topleft=(random.randint(630, 700), random.randint(250, 350))))
+                if k % 3 == 0:
+                    bird_list.append(bird.get_rect(topleft=(500, random.randint(250, 350))))
+                    k += 1
+                elif k % 3 == 1:
+                    bird_list.append(bird.get_rect(topleft=(1000, random.randint(250, 350))))
+                    k += 1
+                else:
+                    bird_list.append(bird.get_rect(topleft=(1500, random.randint(250, 350))))
+                    k += 1
+
+            if event.type == sn_tim:
+                if k % 3 == 0:
+                    sn_list.append(sn.get_rect(topleft=(500, random.randint(250, 350))))
+                    k += 1
+                elif k % 3 == 1:
+                    sn_list.append(sn.get_rect(topleft=(1000, random.randint(250, 350))))
+                    k += 1
+                else:
+                    sn_list.append(sn.get_rect(topleft=(1500, random.randint(250, 350))))
+                    k += 1
 
             if event.type == frog_tim:
-                frog_list.append(frog.get_rect(topleft=(1200, random.randint(300, 400))))
+                frog_list.append(frog.get_rect(topleft=(2000, random.randint(300, 400))))
 
         pygame.display.update()
         clock.tick(10)
@@ -295,6 +327,7 @@ def level2():
 
 
 def play():
+    screen = pygame.display.set_mode((600, 500))
     pygame.display.set_caption("Главное меню")
     while True:
         screen.fill("black")
@@ -334,14 +367,59 @@ def play():
 
 
 def rule():
-    pass
+    pygame.display.set_caption("Правила")
+    screen1 = pygame.display.set_mode((800, 500))
+    while True:
+        fon = pygame.transform.scale(load_image("Green.jpg"),
+                                     (1000, 1000))
+        screen1.blit(fon, (0, 0))
+        pos = pygame.mouse.get_pos()
+        clock = pygame.time.Clock()
+
+        font1 = pygame.font.SysFont('arial', 48)
+        fontr = font1.render("Правила", True, (255, 255, 255))
+        fontrr = fontr.get_rect(center=(400, 20))
+
+        font2 = pygame.font.SysFont('arial', 28)
+        fontr1 = font2.render("Ваша задача помочь маме утке прокормить своих утят", True, "#1E5945")
+        fontrr1 = fontr1.get_rect(center=(400, 200))
+
+        osnf = font2.render("По пути вам встретятся враги, которые будут мешать собирать еду", True, "#1E5945")
+        fontrr2 = osnf.get_rect(center=(400, 230))
+
+        osnf1 = font2.render("Не дайте монстрам вам помешать!", True, "#1E5945")
+        fontrr3 = osnf1.get_rect(center=(400, 330))
+
+        osnf2 = font2.render("Ваша главное преимущество в том, чьл вы очень высоко прыгаете", True, "#1E5945")
+        fontrr4 = osnf1.get_rect(center=(230, 260))
+
+        osnf3 = font2.render("Тебе нужно перепрыгивать монстров, чтобы избежать проигрыша", True, "#1E5945")
+        fontrr5 = osnf1.get_rect(center=(230, 290))
+
+
+        exb = Button(image=None, pos=(700, 450), te_in="Back"
+                     , b_color=(0, 0, 0), h_color="white")
+        screen1.blit(fontr, fontrr)
+        screen1.blit(fontr1, fontrr1)
+        screen1.blit(osnf, fontrr2)
+        screen1.blit(osnf1, fontrr3)
+        screen1.blit(osnf2, fontrr4)
+        screen1.blit(osnf3, fontrr5)
+
+        exb.butcolour(pos)
+        exb.update(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if exb.inside(pos):
+                    play()
+            pygame.display.update()
+            clock.tick(FPS)
 
 
 def start_screen(screen):
     clock = pygame.time.Clock()
-    intro_text = ["Утка в погоне за утятами"]
-    # "Если в правилах несколько строк,",
-    # "приходится выводить их построчно"]
     while True:
         fon = pygame.transform.scale(load_image("mainwind.jpg"),
                                      (screen.get_width(), screen.get_height()))
