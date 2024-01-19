@@ -281,7 +281,6 @@ def level1():
                     lv_sound.stop()
                     play()
 
-
             if event.type == wolf_tim:
                 if k % 3 == 0:
                     wolf_list.append(wolf.get_rect(topleft=(500, random.randint(250, 350))))
@@ -323,7 +322,206 @@ def level1():
 
 
 def level2():
-    pass
+    RUNNING = [pygame.image.load(os.path.join('data/fr1', 'frame_0.png')),
+               pygame.image.load(os.path.join('data/fr1', 'frame_1.png')), ]
+
+    jumping = pygame.image.load(os.path.join('data/fr1', 'frame_3.png'))
+
+    bird = pygame.image.load("data/evel1.png").convert_alpha()
+    bird = pygame.transform.scale(bird, (100, 100))
+
+    sn = pygame.image.load("data/snake.png").convert_alpha()
+    sn = pygame.transform.scale(sn, (100, 100))
+
+    wolf = pygame.image.load("data/wolf.png").convert_alpha()
+    wolf = pygame.transform.scale(wolf, (100, 100))
+
+    frog = pygame.image.load("data/frog.png").convert_alpha()
+    frog = pygame.transform.scale(frog, (60, 60))
+
+    DIFFICULTY = [bird, sn, wolf]
+    FROG = [frog]
+
+    lv = pygame.image.load("data/level1.jpg").convert()
+    lv = pygame.transform.scale(lv, (600, 500))
+
+    class Duck:
+        x_pos = 100
+        y_pos = 230
+        jump_speed = 20
+
+        def __init__(self):
+            self.run_img = RUNNING
+            self.jump_img = jumping
+
+            self.duck_run = True
+            self.duck_jump = False
+
+            self.step = 0
+            self.jump_s = self.jump_speed
+            self.image = self.run_img[0]
+            self.duck_rect = self.image.get_rect()
+            self.duck_rect.x = self.x_pos
+            self.duck_rect.y = self.y_pos
+
+        def update(self, user):
+            if self.duck_run:
+                self.run()
+            if self.duck_jump:
+                self.jump()
+
+            if self.step >= 10:
+                self.step = 0
+
+            if user[pygame.K_UP] and not self.duck_jump:
+                self.duck_run = False
+                self.duck_jump = True
+            elif not (self.duck_jump or user[pygame.K_DOWN]):
+                self.duck_run = True
+                self.duck_jump = False
+
+        def run(self):
+            self.image = self.run_img[self.step // 5]
+            self.duck_rect = self.image.get_rect()
+            self.duck_rect.x = self.x_pos
+            self.duck_rect.y = self.y_pos
+            self.step += 1
+
+        def jump(self):
+            self.image = self.jump_img
+            if self.duck_jump:
+                self.duck_rect.y -= self.jump_s * 1
+                self.jump_s -= 0.8
+            if self.jump_s < - self.jump_speed:
+                self.duck_jump = False
+                self.jump_s = self.jump_speed
+
+        def draw(self, screen):
+            screen.blit(self.image, self.duck_rect)
+
+    class Obstacle(pygame.sprite.Sprite):
+        def __init__(self, image, type):
+            super().__init__()
+            self.image = image
+            self.type = type
+            self.rect = self.image[self.type].get_rect()
+            self.rect.x = 600
+
+        def update(self):
+            self.rect.x -= games
+            if self.rect.x < -self.rect.width:
+                difficulty.pop()
+
+        def draw(self, screen):
+            screen.blit(self.image[self.type], self.rect)
+
+    class Difficult(Obstacle):
+        def __init__(self, image):
+            self.type = random.randint(0, 2)
+            super().__init__(image, self.type)
+            self.rect.y = 325
+
+    class Frog(Obstacle):
+        def __init__(self, image):
+            self.type = 0
+            super().__init__(image, self.type)
+            self.rect.y = 325
+
+    def main():
+        global games, x_pos_lv, y_pos_lv, difficulty, points
+        running = True
+        games = 7
+        x_pos_lv = 0
+        y_pos_lv = 0
+        difficulty = []
+        points = 0
+        death_count = 0
+        clock = pygame.time.Clock()
+        duck = Duck()
+
+        def score():
+            global points, games
+
+            font = pygame.font.SysFont("arial", 50)
+            text = font.render("Score: " + str(points), True, (0, 0, 0))
+            textRect = text.get_rect()
+            textRect.center = (480, 10)
+            screen.blit(text, textRect)
+
+        def background():
+            global x_pos_lv, y_pos_lv
+            image_width = lv.get_width()
+            screen.blit(lv, (x_pos_lv, y_pos_lv))
+            screen.blit(lv, (image_width + x_pos_lv, y_pos_lv))
+            if x_pos_lv <= -image_width:
+                screen.blit(lv, (image_width + x_pos_lv, y_pos_lv))
+                x_pos_lv = 0
+            x_pos_lv -= games
+
+        exb = Button(image=None, pos=(50, 20), te_in="Back"
+                     , b_color=(0, 0, 0), h_color="white")
+        pos = pygame.mouse.get_pos()
+        exb.butcolour(pos)
+        exb.update(screen)
+
+        pygame.display.flip()
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if exb.inside(pos):
+                        play()
+
+            screen.fill((0, 0, 0))
+            user = pygame.key.get_pressed()
+
+            background()
+            duck.draw(screen)
+            duck.update(user)
+            exb.butcolour(pos)
+            exb.update(screen)
+            score()
+
+            if len(difficulty) == 0:
+                if random.randint(0, 1) == 0:
+                    difficulty.append(Difficult(DIFFICULTY))
+                elif random.randint(0, 1) == 1:
+                    difficulty.append(Frog(FROG))
+
+            for i in difficulty:
+                i.draw(screen)
+                i.update()
+                if duck.duck_rect.colliderect(i.rect):
+                    if i.rect == frog:
+                        points += 1
+                    else:
+                        pygame.time.delay(500)
+                        screen.fill((255, 255, 255))
+
+                        font = pygame.font.SysFont("arial", 50)
+                        text = font.render("You lose!", True, (110, 210, 255))
+                        textRect = text.get_rect()
+                        textRect.center = (600 // 2, 100)
+                        screen.blit(text, textRect)
+                        screen.blit(RUNNING[0], (600 // 2 - 20, 500 // 2 - 140))
+                        rest = Button(image=img2, pos=(300, 350), te_in="Restart"
+                                      , b_color=(255, 255, 255), h_color="#6495ED")
+                        pos = pygame.mouse.get_pos()
+                        rest.butcolour(pos)
+                        rest.update(screen)
+                        pygame.display.update()
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                running = False
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                if rest.inside(pos):
+                                    main()
+
+            clock.tick(30)
+            pygame.display.update()
+
+    main()
 
 
 def play():
@@ -388,7 +586,7 @@ def rule():
         fontrr2 = osnf.get_rect(center=(400, 230))
 
         osnf1 = font2.render("Не дайте монстрам вам помешать!", True, "#1E5945")
-        fontrr3 = osnf1.get_rect(center=(400, 330))
+        fontrr3 = osnf1.get_rect(center=(400, 380))
 
         osnf2 = font2.render("Ваша главное преимущество в том, чьл вы очень высоко прыгаете", True, "#1E5945")
         fontrr4 = osnf1.get_rect(center=(230, 260))
@@ -396,6 +594,11 @@ def rule():
         osnf3 = font2.render("Тебе нужно перепрыгивать монстров, чтобы избежать проигрыша", True, "#1E5945")
         fontrr5 = osnf1.get_rect(center=(230, 290))
 
+        osnf4 = font2.render("В первом уровне перемешай утку стрелками 'вверх' и 'вниз' ", True, "#1E5945")
+        fontrr6 = osnf1.get_rect(center=(230, 320))
+
+        osnf5 = font2.render("Во втором уровне помогай утке подпрыгнуть стрелкой 'вверх'", True, "#1E5945")
+        fontrr7 = osnf1.get_rect(center=(230, 350))
 
         exb = Button(image=None, pos=(700, 450), te_in="Back"
                      , b_color=(0, 0, 0), h_color="white")
@@ -405,6 +608,8 @@ def rule():
         screen1.blit(osnf1, fontrr3)
         screen1.blit(osnf2, fontrr4)
         screen1.blit(osnf3, fontrr5)
+        screen1.blit(osnf4, fontrr6)
+        screen1.blit(osnf5, fontrr7)
 
         exb.butcolour(pos)
         exb.update(screen)
@@ -426,7 +631,7 @@ def start_screen(screen):
         screen.blit(fon, (0, 0))
 
         font = pygame.font.SysFont('arial', 48)
-        font = font.render("Утка в погоне за утятами", True, (74, 144, 226))
+        font = font.render("Утка Сью", True, (74, 144, 226))
 
         pos = pygame.mouse.get_pos()
         st_t = font.get_rect(center=(300, 100))
