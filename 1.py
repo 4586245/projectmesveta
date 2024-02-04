@@ -150,7 +150,7 @@ def level1():
     rest = font.render("Restart", False, (115, 132, 148))
     rest_rect = rest.get_rect(topleft=(220, 250))
 
-    exb = Button(image=None, pos=(50, 20), te_in="Back"
+    exb = Button(image=None, pos=(50, 20), te_in="Назад"
                  , b_color=(0, 0, 0), h_color="white")
 
     pos = pygame.mouse.get_pos()
@@ -167,7 +167,7 @@ def level1():
         k = 0
         if gamep:
             player_rect = walk1[0].get_rect(topleft=(player_x, player_y))
-            print_tex("scores:" + str(scores), 480, 10)
+            print_tex("Счет:" + str(scores), 480, 10)
             exb.butcolour(pos)
             exb.update(screen)
             if frog_list:
@@ -256,10 +256,47 @@ def level1():
 
 
         else:
-            pos = pygame.mouse.get_pos()
+            '''pos = pygame.mouse.get_pos()
             screen.fill((87, 88, 89))
             screen.blit(lose, (220, 100))
-            screen.blit(rest, rest_rect)
+            screen.blit(rest, rest_rect)'''
+            lv_sound.stop()
+
+            pygame.time.delay(500)
+            screen.fill((255, 255, 255))
+            font = pygame.font.SysFont("arial", 50)
+            text = font.render("Вы проиграли!", True, (110, 210, 255))
+            textRect = text.get_rect()
+            textRect.center = (600 // 2, 100)
+            screen.blit(text, textRect)
+            text1 = font.render(f"Счет: {scores}", True, (110, 210, 255))
+            textRect1 = text.get_rect()
+            textRect1.center = (370, 220)
+            screen.blit(text1, textRect1)
+            with open("results.txt", "w", encoding="utf8") as f:
+                f.write(f"Scores:{scores}")
+            screen.blit(walk[0], (600 // 2 - 260, 500 // 2 - 140))
+            screen.blit(walk[0], (600 // 2 + 120, 500 // 2 - 140))
+            rest = Button(image=img2, pos=(300, 350), te_in="играть"
+                          , b_color=(255, 255, 255), h_color="#6495ED")
+            exb = Button(image=None, pos=(300, 450), te_in="Назад"
+                         , b_color=(0, 0, 0), h_color="white")
+            pos = pygame.mouse.get_pos()
+            exb.butcolour(pos)
+            exb.update(screen)
+
+            rest.butcolour(pos)
+            rest.update(screen)
+            pygame.display.update()
+
+            '''for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if rest.inside(pos):
+                        level1()
+                    if exb.inside(pos):
+                        play()'''
 
             if rest_rect.collidepoint(pos) and pygame.mouse.get_pressed()[0]:
                 gamep = True
@@ -279,7 +316,12 @@ def level1():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if exb.inside(pos):
                     lv_sound.stop()
+                    with open("results.txt", "w", encoding="utf8") as f:
+                        f.write(f"Scores:{scores}")
                     play()
+                if rest.inside(pos):
+                    lv_sound.stop()
+                    level1()
 
             if event.type == wolf_tim:
                 if k % 3 == 0:
@@ -428,25 +470,18 @@ def level2():
             self.rect.y = 325
 
     def main():
-        global games, x_pos_lv, y_pos_lv, difficulty, points
+        global games, x_pos_lv, y_pos_lv, difficulty, points, f
         running = True
         games = 7
         x_pos_lv = 0
         y_pos_lv = 0
         difficulty = []
+        f = []
         points = 0
         death_count = 0
+        scores = 0
         clock = pygame.time.Clock()
         duck = Duck()
-
-        def score():
-            global points, games
-
-            font = pygame.font.SysFont("arial", 50)
-            text = font.render("Score: " + str(points), True, (0, 0, 0))
-            textRect = text.get_rect()
-            textRect.center = (480, 10)
-            screen.blit(text, textRect)
 
         def background():
             global x_pos_lv, y_pos_lv
@@ -458,65 +493,95 @@ def level2():
                 x_pos_lv = 0
             x_pos_lv -= games
 
-        exb = Button(image=None, pos=(50, 20), te_in="Back"
-                     , b_color=(0, 0, 0), h_color="white")
         pos = pygame.mouse.get_pos()
-        exb.butcolour(pos)
-        exb.update(screen)
+
+        gamep = True
+        numer = 0
 
         pygame.display.flip()
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if exb.inside(pos):
                         play()
 
-            screen.fill((0, 0, 0))
-            user = pygame.key.get_pressed()
+            if gamep:
+                screen.fill((0, 0, 0))
+                user = pygame.key.get_pressed()
+                background()
+                duck.draw(screen)
+                duck.update(user)
+                exb = Button(image=None, pos=(50, 20), te_in="Назад"
+                             , b_color=(0, 0, 0), h_color="white")
+                pos = pygame.mouse.get_pos()
+                exb.butcolour(pos)
+                exb.update(screen)
+                print_tex("Счет:" + str(scores), 480, 10)
 
-            background()
-            duck.draw(screen)
-            duck.update(user)
-            exb.butcolour(pos)
-            exb.update(screen)
-            score()
+                if len(difficulty) == 0:
+                    if random.randint(0, 1) == 0:
+                        difficulty.append(Difficult(DIFFICULTY))
+                        numer = 0
+                    elif random.randint(0, 1) == 1:
+                        difficulty.append(Frog(FROG))
+                        numer = 1
 
-            if len(difficulty) == 0:
-                if random.randint(0, 1) == 0:
-                    difficulty.append(Difficult(DIFFICULTY))
-                elif random.randint(0, 1) == 1:
-                    difficulty.append(Frog(FROG))
+                for i in difficulty:
+                    i.draw(screen)
+                    i.update()
+                    if duck.duck_rect.colliderect(i.rect):
+                        if numer == 1:
+                            difficulty.pop()
+                            scores += 1
+                            gamep = True
+                        else:
+                            gamep = False
 
-            for i in difficulty:
-                i.draw(screen)
-                i.update()
-                if duck.duck_rect.colliderect(i.rect):
-                    if i.rect == frog:
-                        points += 1
-                    else:
-                        pygame.time.delay(500)
-                        screen.fill((255, 255, 255))
+            else:
+                pygame.mixer.music.stop()
+                # lv_sound.stop()
+                pygame.time.delay(500)
+                screen.fill((255, 255, 255))
+                font = pygame.font.SysFont("arial", 50)
+                text = font.render("Вы проиграли!", True, (110, 210, 255))
+                textRect = text.get_rect()
+                textRect.center = (600 // 2, 100)
+                screen.blit(text, textRect)
+                text1 = font.render(f"Счет: {scores}", True, (110, 210, 255))
+                with open("results.txt", "w", encoding="utf8") as f:
+                    f.write(f"Scores:{scores}")
+                textRect1 = text.get_rect()
+                textRect1.center = (370, 220)
+                screen.blit(text1, textRect1)
+                screen.blit(RUNNING[0], (600 // 2 - 260, 500 // 2 - 140))
+                screen.blit(RUNNING[0], (600 // 2 + 120, 500 // 2 - 140))
+                rest = Button(image=img2, pos=(300, 350), te_in="играть"
+                              , b_color=(255, 255, 255), h_color="#6495ED")
+                exb = Button(image=None, pos=(300, 450), te_in="Назад"
+                             , b_color=(0, 0, 0), h_color="white")
+                pos = pygame.mouse.get_pos()
+                exb.butcolour(pos)
+                exb.update(screen)
 
-                        font = pygame.font.SysFont("arial", 50)
-                        text = font.render("You lose!", True, (110, 210, 255))
-                        textRect = text.get_rect()
-                        textRect.center = (600 // 2, 100)
-                        screen.blit(text, textRect)
-                        screen.blit(RUNNING[0], (600 // 2 - 20, 500 // 2 - 140))
-                        rest = Button(image=img2, pos=(300, 350), te_in="Restart"
-                                      , b_color=(255, 255, 255), h_color="#6495ED")
-                        pos = pygame.mouse.get_pos()
-                        rest.butcolour(pos)
-                        rest.update(screen)
-                        pygame.display.update()
-                        for event in pygame.event.get():
-                            if event.type == pygame.QUIT:
-                                running = False
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if rest.inside(pos):
-                                    main()
+                rest.butcolour(pos)
+                rest.update(screen)
+                pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        terminate()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if rest.inside(pos):
+                            main()
+                            with open("results.txt", "w", encoding="utf8") as f:
+                                f.write(f"Scores:{scores}")
+                        if exb.inside(pos):
+                            play()
+                            with open("results.txt", "w", encoding="utf8") as f:
+                                f.write(f"Scores:{scores}")
 
             clock.tick(30)
             pygame.display.update()
@@ -536,13 +601,13 @@ def play():
         font = font.render("Уровни", True, (255, 255, 255))
         st_t = font.get_rect(center=(300, 150))
         pos = pygame.mouse.get_pos()
-        rules = Button(image=img2, pos=(300, 50), te_in="Rules"
+        rules = Button(image=img2, pos=(300, 50), te_in="Правила"
                        , b_color=(255, 255, 255), h_color="#6495ED")
-        exb = Button(image=None, pos=(500, 450), te_in="Back"
+        exb = Button(image=None, pos=(500, 450), te_in="Назад"
                      , b_color=(0, 0, 0), h_color="white")
-        lev1 = Button(image=le1, pos=(150, 300), te_in="Level 1"
+        lev1 = Button(image=le1, pos=(150, 300), te_in="Уровень 1"
                       , b_color=(255, 255, 255), h_color="#6495ED")
-        lev2 = Button(image=le1, pos=(450, 300), te_in="Level 2"
+        lev2 = Button(image=le1, pos=(450, 300), te_in="Уровень 2"
                       , b_color=(255, 255, 255), h_color="#6495ED")
         screen.blit(font, st_t)
         for button in [rules, exb, lev1, lev2]:
@@ -576,7 +641,7 @@ def rule():
 
         font1 = pygame.font.SysFont('arial', 48)
         fontr = font1.render("Правила", True, (255, 255, 255))
-        fontrr = fontr.get_rect(center=(400, 20))
+        fontrr = fontr.get_rect(center=(400, 120))
 
         font2 = pygame.font.SysFont('arial', 28)
         fontr1 = font2.render("Ваша задача помочь маме утке прокормить своих утят", True, "#1E5945")
@@ -588,7 +653,7 @@ def rule():
         osnf1 = font2.render("Не дайте монстрам вам помешать!", True, "#1E5945")
         fontrr3 = osnf1.get_rect(center=(400, 380))
 
-        osnf2 = font2.render("Ваша главное преимущество в том, чьл вы очень высоко прыгаете", True, "#1E5945")
+        osnf2 = font2.render("Ваша главное преимущество в том, что вы очень высоко прыгаете", True, "#1E5945")
         fontrr4 = osnf1.get_rect(center=(230, 260))
 
         osnf3 = font2.render("Тебе нужно перепрыгивать монстров, чтобы избежать проигрыша", True, "#1E5945")
@@ -600,7 +665,7 @@ def rule():
         osnf5 = font2.render("Во втором уровне помогай утке подпрыгнуть стрелкой 'вверх'", True, "#1E5945")
         fontrr7 = osnf1.get_rect(center=(230, 350))
 
-        exb = Button(image=None, pos=(700, 450), te_in="Back"
+        exb = Button(image=None, pos=(700, 450), te_in="Назад"
                      , b_color=(0, 0, 0), h_color="white")
         screen1.blit(fontr, fontrr)
         screen1.blit(fontr1, fontrr1)
